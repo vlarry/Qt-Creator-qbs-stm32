@@ -1,0 +1,18 @@
+#include "stm32f10x.h"
+//--------
+int main()
+{
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+
+    GPIOB->CRH &= ~(GPIO_CRH_CNF10 | GPIO_CRH_CNF11 | GPIO_CRH_CNF12 | GPIO_CRH_MODE10 | GPIO_CRH_MODE11 | GPIO_CRH_MODE12 );
+    GPIOB->CRH |= GPIO_CRH_MODE10_1 | GPIO_CRH_MODE11_1 | GPIO_CRH_MODE12_1;
+
+    GPIOB->BSRR |= GPIO_BSRR_BR10 | GPIO_BSRR_BS11 | GPIO_BSRR_BR12;
+
+    while(1)
+    {
+
+    }
+
+    return 0;
+}
