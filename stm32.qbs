@@ -3,7 +3,7 @@ import qbs.FileInfo
 
 Product
 {
-    type: ["application", "hex", "bin", "size", "flash"]
+    type: ["application", "flash"]
     Depends { name: "cpp" }
 
     cpp.defines: ["STM32F10X_LD_VL"]
@@ -83,99 +83,28 @@ Product
 
         Artifact
         {
-            filePath: project.path + "/debug/bin/" + input.baseName + ".hex"
-            fileTags: ["hex"]
-        }
-
-        prepare:
-        {
-            var args = ["-O", "ihex"];
-
-            args.push(input.filePath);
-            args.push(output.filePath);
-
-            var objcopyPath = "c:/development/gcc-arm/bin/arm-none-eabi-objcopy.exe";
-
-            var cmd = new Command(objcopyPath, args);
-
-            cmd.description = "convert to hex...";
-            cmd.highlight = "linker"
-            cmd.silent = false;
-
-            return cmd;
-        }
-    }
-
-    Rule
-    {
-        inputs: ["application"]
-
-        Artifact
-        {
             filePath: project.path + "/debug/bin/" + input.baseName + ".bin"
-            fileTags: ["bin"]
+            fileTags: "flash"
         }
 
         prepare:
         {
-            var args = ["-O", "binary"];
-
-            args.push(input.filePath);
-            args.push(output.filePath);
-
+            var sizePath = "c:/development/gcc-arm/bin/arm-none-eabi-size.exe";
             var objcopyPath = "c:/development/gcc-arm/bin/arm-none-eabi-objcopy.exe";
 
-            var cmd = new Command(objcopyPath, args);
+            var argsSize = [input.filePath];
+            var argsObjcopy = ["-O", "binary", input.filePath, output.filePath];
 
-            cmd.description = "convert to bin...";
-            cmd.highlight = "linker"
-            cmd.silent = false;
+            var cmdSize = new Command(sizePath, argsSize);
+            var cmdObjcopy = new Command(objcopyPath, argsObjcopy);
 
-//            var flashOpenOCD = "c:/development/openocd_0_10_0/bin/openocd.exe";
-//            var flashCfgStlink = "c:/development/openocd_0_10_0/scripts/interface/stlink-v2.cfg";
-//            var flashCfgStm32 = "c:/development/openocd_0_10_0/scripts/target/stm32f1x.cfg";
-//            var fileFlashing = "flash write_image erase " + input.filePath;
-//            var argsFlashing =
-//            [
-//                "-f", flashCfgStlink,
-//                "-f", flashCfgStm32,
-//                "-c", "init",
-//                "-c", "halt",
-//                "-c", fileFlashing,
-//                "-c", "reset",
-//                "-c", "shutdown"
-//            ]
+            cmdSize.description = "Size of sections:";
+            cmdSize.highlight = "linker";
 
-//            var cmd_flash = new Command(flashOpenOCD, argsFlashing);
+            cmdObjcopy.description = "convert to bin...";
+            cmdObjcopy.highlight = "linker";
 
-//            cmd_flash.description = "flashing to uC: " + FileInfo.fileName(input.filePath);
-//            cmd_flash.highlight = "linker";
-
-            return [cmd/*, cmd_flash*/];
-        }
-    }
-
-    Rule
-    {
-        inputs: "application"
-
-        Artifact
-        {
-            fileTags: "size"
-        }
-
-        prepare:
-        {
-            var args = [input.filePath];
-            var sizePath = "c:/development/gcc-arm/bin/arm-none-eabi-size.exe";
-
-            var cmd = new Command(sizePath, args);
-
-            cmd.description = "Size of sections:";
-            cmd.highlight = "linker"
-            cmd.silent = false;
-
-            return cmd;
+            return [cmdSize, cmdObjcopy];
         }
     }
 }
