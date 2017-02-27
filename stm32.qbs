@@ -1,5 +1,4 @@
 import qbs
-import qbs.FileInfo
 
 Product
 {
@@ -83,7 +82,7 @@ Product
 
         Artifact
         {
-            filePath: project.path + "/debug/bin/" + input.baseName + ".bin"
+            filePath: project.path + "/debug/bin/" + input.baseName + ".hex"
             fileTags: "flash"
         }
 
@@ -93,10 +92,10 @@ Product
             var objcopyPath = "c:/development/gcc-arm/bin/arm-none-eabi-objcopy.exe";
             var configStlinkPath = "c:/development/openocd_0_10_0/scripts/interface/stlink-v2.cfg";
             var configStm32Path = "c:/development/openocd_0_10_0/scripts/target/stm32f1x.cfg";
-            var openocdPath = "c:/development/openocd_0_10_0/bin/openocd.exe";
+            var flashPath = "c:/development/openocd_0_10_0/bin/openocd.exe";
 
             var argsSize = [input.filePath];
-            var argsObjcopy = ["-O", "binary", input.filePath, output.filePath];
+            var argsObjcopy = ["-O", "ihex", input.filePath, output.filePath];
 
             var argsFlashing =
             [
@@ -104,13 +103,14 @@ Product
                 "-f", configStm32Path,
                 "-c", "init",
                 "-c", "halt",
-                "-c", CMD,
+                "-c", "flash write_image erase " + input.filePath,
                 "-c", "reset",
                 "-c", "shutdown"
             ];
 
             var cmdSize = new Command(sizePath, argsSize);
             var cmdObjcopy = new Command(objcopyPath, argsObjcopy);
+            var cmdFlash = new Command(flashPath, argsFlashing);
 
             cmdSize.description = "Size of sections:";
             cmdSize.highlight = "linker";
@@ -118,7 +118,10 @@ Product
             cmdObjcopy.description = "convert to bin...";
             cmdObjcopy.highlight = "linker";
 
-            return [cmdSize, cmdObjcopy];
+            cmdFlash.description = "download firmware to uC...";
+            cmdFlash.highlight = "linker";
+
+            return [cmdSize, cmdObjcopy, cmdFlash];
         }
     }
 }
