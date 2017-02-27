@@ -91,9 +91,23 @@ Product
         {
             var sizePath = "c:/development/gcc-arm/bin/arm-none-eabi-size.exe";
             var objcopyPath = "c:/development/gcc-arm/bin/arm-none-eabi-objcopy.exe";
+            var configStlinkPath = "c:/development/openocd_0_10_0/scripts/interface/stlink-v2.cfg";
+            var configStm32Path = "c:/development/openocd_0_10_0/scripts/target/stm32f1x.cfg";
+            var openocdPath = "c:/development/openocd_0_10_0/bin/openocd.exe";
 
             var argsSize = [input.filePath];
             var argsObjcopy = ["-O", "binary", input.filePath, output.filePath];
+
+            var argsFlashing =
+            [
+                "-f", configStlinkPath,
+                "-f", configStm32Path,
+                "-c", "init",
+                "-c", "halt",
+                "-c", CMD,
+                "-c", "reset",
+                "-c", "shutdown"
+            ];
 
             var cmdSize = new Command(sizePath, argsSize);
             var cmdObjcopy = new Command(objcopyPath, argsObjcopy);
