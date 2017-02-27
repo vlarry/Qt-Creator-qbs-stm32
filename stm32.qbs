@@ -2,6 +2,8 @@ import qbs
 
 Product
 {
+    property string optimization: "fast"
+
     type: ["application", "flash"]
     Depends { name: "cpp" }
 
@@ -9,6 +11,22 @@ Product
     cpp.positionIndependentCode: false
     cpp.enableExceptions: false
     cpp.executableSuffix: ".elf"
+
+    Properties
+    {
+        condition: qbs.buildVariant === "debug"
+        cpp.defines: outer.concat(["DEBUG=1"])
+        cpp.debugInformation: true
+        cpp.optimization: "none"
+    }
+
+    Properties
+    {
+        condition: qbs.buildVariant === "release"
+        cpp.debugInformation: false
+        cpp.optimization: optimization
+    }
+
     cpp.driverFlags:
     [
         "-mthumb",
@@ -18,7 +36,6 @@ Product
         "-g3",
         "-Wall",
         "-mfpu=vfp",
-        "-O0",
         "-flto",
     ]
 
@@ -60,21 +77,6 @@ Product
         "src/system/cmsis_boot/startup/*.c",
         "src/main.cpp"
     ]
-
-    Properties
-    {
-        condition: qbs.buildVariant === "debug"
-        cpp.defines: outer.concat(["DEBUG=1"])
-        cpp.debugInformation: true
-        cpp.optimization: "none"
-    }
-
-    Properties
-    {
-        condition: qbs.buildVariant === "release"
-        cpp.debugInformation: false
-        cpp.optimization: "small"
-    }
 
     Rule
     {
