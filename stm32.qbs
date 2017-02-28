@@ -84,7 +84,7 @@ Product
 
         Artifact
         {
-            filePath: project.path + "/debug/bin/" + input.baseName + ".hex"
+            filePath: project.path + "/build/debug/bin/" + input.baseName + ".hex"
             fileTags: "flash"
         }
 
